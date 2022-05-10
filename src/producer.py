@@ -92,8 +92,7 @@ async def produce_message(topic: str, message: GenericObject):
 
 
 async def main():
-    # Schedule three calls *concurrently*:
-    for _ in range(0, 1_000):
+    for _ in range(0, 100_000):
         val = GenericObject.create(
             metric="a_importent_metric",
             value={"data":[dict(ts=j, val=random.randint(0, 100)) for j in range(6)]},
