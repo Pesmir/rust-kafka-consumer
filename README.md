@@ -8,16 +8,18 @@ This is just a demo with some GenericObjects to see what would be possible with 
 ```sh
 docker-compose up
 ```
-#### 3. Start Kakfa consumer in rust
-```sh
-RUST_LOG="info,rdkafka::client=warn" cargo run
-```
 
-#### 4. Start python producer
+#### 3. Start python producer
 ```sh
 virtualenv venv 
 source venv/bin/activate
 which pip3 # check that it is pointing to venv
 pip3 install aiokafka -U
 python src/producer.py
+```
+
+#### 4. Start Kakfa consumer in rust
+
+```sh
+RUST_LOG="info,rdkafka::client=warn" cargo run
 ```
