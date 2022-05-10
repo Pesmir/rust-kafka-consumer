@@ -4,16 +4,16 @@ This is just a demo with some GenericObjects to see what would be possible with 
 
 ## How to start
 #### 1. Clone Repo
-#### Start docker container with redpanda
+#### 2. Start docker container with redpanda
 ```sh
 docker-compose up
 ```
-#### Start Kakfa consumer in rust
+#### 3. Start Kakfa consumer in rust
 ```sh
 RUST_LOG="info,rdkafka::client=warn" cargo run
 ```
 
-#### Start python producer
+#### 4. Start python producer
 ```sh
 virtualenv venv 
 source venv/bin/activate
