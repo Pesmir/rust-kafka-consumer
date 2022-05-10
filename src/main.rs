@@ -28,20 +28,20 @@ async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Resu
         let _strm = m
             .payload_view::<str>()
             .ok_or(CallystoError::GeneralError("Payload view failure".into()))??;
-        let animal_prefix = &_strm[0..48];
-        info!("AGENT1: Data from {}", animal_prefix);
+        info!("AGENT1: Got data {}", _strm);
 
 
         // Increment message counter and print it.
         // Show how you can store a application state.
         let state = ctx.state();
         let msgcount = state.value.fetch_add(1, Ordering::AcqRel);
+        println!("{}", msgcount);
         if msgcount == 0 {
             let now = SystemTime::now();
             let du = now.duration_since(UNIX_EPOCH).unwrap();
             println!("Start time in millis: {}", du.as_millis());
         }
-        if msgcount == 199_999 {
+        if msgcount == 1000 {
             let now = SystemTime::now();
             let du = now.duration_since(UNIX_EPOCH).unwrap();
             println!("End time in millis: {}", du.as_millis());
@@ -58,8 +58,7 @@ async fn counter_agent_2(mut stream: CStream, ctx: Context<SharedState>) -> Resu
         let _strm = m
             .payload_view::<str>()
             .ok_or(CallystoError::GeneralError("Payload view failure".into()))??;
-        let animal_prefix = &_strm[0..48];
-        info!("AGENT2: Data from {}", animal_prefix);
+        info!("AGENT2: Got data {}", _strm);
 
         // Increment message counter and print it.
         // Show how you can store a application state.
@@ -70,7 +69,7 @@ async fn counter_agent_2(mut stream: CStream, ctx: Context<SharedState>) -> Resu
             let du = now.duration_since(UNIX_EPOCH).unwrap();
             println!("Start time in millis: {}", du.as_millis());
         }
-        if msgcount == 199_999 {
+        if msgcount == 999 {
             let now = SystemTime::now();
             let du = now.duration_since(UNIX_EPOCH).unwrap();
             println!("End time in millis: {}", du.as_millis());
