@@ -1,1 +1,4 @@
 venv
+target/
+docker/docker-elk*
+Cargo.lock

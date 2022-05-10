@@ -1,0 +1,10 @@
+[package]
+name = "RustKafkaConsumer"
+description = "RustKafkaConsumer for testing some stuff"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+callysto = "0.1.6"
+tracing = "0.1.34"
+
