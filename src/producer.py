@@ -94,7 +94,7 @@ async def main():
     for _ in range(0, 100_000):
         # This could be some time series data
         val = GenericObject.create(
-            metric="a_importent_metric",
+            metric="a_important_metric",
             value={"data":[dict(ts=j, val=random.randint(0, 100)) for j in range(6)]},
         )
         await produce_message("double-agent-1", val)
