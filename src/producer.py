@@ -82,10 +82,9 @@ class GenericObject(object):
 
 async def produce_message(topic: str, message: GenericObject):
     producer = aiokafka.AIOKafkaProducer(bootstrap_servers="localhost:9092")
-    k = GenericObject.create_key(id="AAAA", second_id="bbbb")
     await producer.start()
     try:
-        # Maybe some smart guy decided to serialize GenericObjects like that :+1:
+        # A smart guy decided to serialize GenericObjects like that! <3 
         await producer.send_and_wait(topic, json.dumps(message.serialize()).encode("utf-8"))
     finally:
         await producer.stop()
@@ -93,6 +92,7 @@ async def produce_message(topic: str, message: GenericObject):
 
 async def main():
     for _ in range(0, 100_000):
+        # This could be some time series data
         val = GenericObject.create(
             metric="a_importent_metric",
             value={"data":[dict(ts=j, val=random.randint(0, 100)) for j in range(6)]},
