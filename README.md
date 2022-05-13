@@ -5,7 +5,7 @@ possible with a rust consumer.
 
 ## How to start
 #### 1. Clone Repo
-#### 2. Start docker container with redpanda
+#### 2. Start docker container
 ```sh
 docker-compose --file docker/docker-compose.kafkasn.yml up
 ```
