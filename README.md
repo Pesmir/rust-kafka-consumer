@@ -1,20 +1,20 @@
 # rust-kafka-consumer
 
-This is just a demo with some GenericObjects to see what would be possible with a rust consumer with an redpanda backend
+This is just a demo with some GenericObjects to see what would be 
+possible with a rust consumer.
 
 ## How to start
 #### 1. Clone Repo
 #### 2. Start docker container with redpanda
 ```sh
-docker-compose up
+docker-compose --file docker/docker-compose.kafkasn.yml up
 ```
 
 #### 3. Start python producer
 ```sh
-virtualenv venv 
+python3.10 -m venv venv
 source venv/bin/activate
-which pip3 # check that it is pointing to venv
-pip3 install aiokafka -U
+pip install -U pip setuptools .
 python src/producer.py
 ```
 
@@ -23,3 +23,4 @@ python src/producer.py
 ```sh
 RUST_LOG="info,rdkafka::client=warn" cargo run
 ```
+It could take some time until the kafka actually sends data.
