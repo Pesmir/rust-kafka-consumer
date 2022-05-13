@@ -1,10 +1,11 @@
 [package]
-name = "RustKafkaConsumer"
+name = "rust_kafka_consumer"
 description = "RustKafkaConsumer for testing some stuff"
 version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+pyo3 = "0.16.4"
 callysto = "0.1.6"
 tracing = "0.1.34"
 

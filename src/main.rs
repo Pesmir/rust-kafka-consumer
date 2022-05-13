@@ -1,3 +1,4 @@
+use pyo3::prelude::{Python, PyModule};
 use callysto::futures::StreamExt;
 use callysto::kafka::cconsumer::CStream;
 use callysto::kafka::enums::OffsetReset;
@@ -5,46 +6,55 @@ use callysto::prelude::message::*;
 use callysto::prelude::*;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::Instant;
+
 use tracing::info;
 
 #[derive(Clone)]
 struct SharedState {
-    value: Arc<AtomicU32>,
+    elapsed_us: Arc<AtomicU32>,
+    msg_count: Arc<AtomicU32>,
 }
 
 impl SharedState {
     fn new() -> Self {
         Self {
-            value: Arc::new(AtomicU32::new(0)),
+            elapsed_us: Arc::new(AtomicU32::new(0)),
+            msg_count: Arc::new(AtomicU32::new(0)),
         }
     }
 }
 
 async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Result<()> {
+    pyo3::prepare_freethreaded_python();
+    let my_module_path = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/my_py_algos.py"));
+
     while let Some(msg) = stream.next().await {
         // Read the incoming bytes as string
         let m = msg.unwrap();
-        let _strm = m
+        let strm = m
             .payload_view::<str>()
             .ok_or(CallystoError::GeneralError("Payload view failure".into()))??;
-        info!("AGENT1: Got data {}", _strm);
 
-
-        // Increment message counter and print it.
-        // Show how you can store a application state.
         let state = ctx.state();
-        let msgcount = state.value.fetch_add(1, Ordering::AcqRel);
-        if msgcount == 0 {
-            let now = SystemTime::now();
-            let du = now.duration_since(UNIX_EPOCH).unwrap();
-            println!("Start time in millis: {}", du.as_millis());
-        }
-        if msgcount == 199_999 {
-            let now = SystemTime::now();
-            let du = now.duration_since(UNIX_EPOCH).unwrap();
-            println!("End time in millis: {}", du.as_millis());
-        }
+
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        let my_algo1 = PyModule::from_code(py, &my_module_path, "", "")
+            .unwrap()
+            .getattr("algo1_rust_version").unwrap()
+            .getattr("rust_wrapper").unwrap();
+        let now = Instant::now();
+        let arg = (strm,);
+        let algo_res = my_algo1.call1(arg).unwrap();
+        
+
+        let elapsed_mus: u32 = now.elapsed().as_micros() as u32;
+        let agent_time = state.elapsed_us.fetch_add(elapsed_mus, Ordering::AcqRel);
+        let msg_count = state.msg_count.fetch_add(1, Ordering::AcqRel);
+        info!("AGENT1: Got data {}", strm);
+        info!("AGENT1: Produced data {}", algo_res);
+        info!("Total time elapsed in agents {}us at {} messages", agent_time, msg_count);
     }
 
     Ok(())
@@ -52,27 +62,19 @@ async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Resu
 
 async fn counter_agent_2(mut stream: CStream, ctx: Context<SharedState>) -> Result<()> {
     while let Some(msg) = stream.next().await {
+        let now = Instant::now();
         // Read the incoming bytes as string
         let m = msg.unwrap();
         let _strm = m
             .payload_view::<str>()
             .ok_or(CallystoError::GeneralError("Payload view failure".into()))??;
-        info!("AGENT2: Got data {}", _strm);
 
-        // Increment message counter and print it.
-        // Show how you can store a application state.
         let state = ctx.state();
-        let msgcount = state.value.fetch_add(1, Ordering::AcqRel);
-        if msgcount == 0 {
-            let now = SystemTime::now();
-            let du = now.duration_since(UNIX_EPOCH).unwrap();
-            println!("Start time in millis: {}", du.as_millis());
-        }
-        if msgcount == 199_999 {
-            let now = SystemTime::now();
-            let du = now.duration_since(UNIX_EPOCH).unwrap();
-            println!("End time in millis: {}", du.as_millis());
-        }
+        let elapsed_mus: u32 = now.elapsed().as_micros() as u32;
+        let agent_time = state.elapsed_us.fetch_add(elapsed_mus, Ordering::AcqRel);
+        let msg_count = state.msg_count.fetch_add(1, Ordering::AcqRel);
+        info!("AGENT1: Got data {}", _strm);
+        info!("Total time elapsed in agents {}us at {} messages", agent_time, msg_count);
     }
 
     Ok(())

@@ -91,6 +91,7 @@ async def produce_message(topic: str, message: GenericObject):
 
 
 async def main():
+    await aiokafka.AIOKafkaProducer(bootstrap_servers="localhost:9092").stop()
     for _ in range(0, 100_000):
         # This could be some time series data
         val = GenericObject.create(
@@ -98,8 +99,9 @@ async def main():
             value={"data":[dict(ts=j, val=random.randint(0, 100)) for j in range(6)]},
         )
         await produce_message("double-agent-1", val)
-        await produce_message("double-agent-2", val)
-        print(f"Produced {val}")
+        # await produce_message("double-agent-2", val)
+        sent_val = json.dumps(val.serialize()).encode("utf-8")
+        print(f"Produced {sent_val}")
     print("DONE")
 
 
