@@ -26,6 +26,7 @@ impl SharedState {
 
 async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Result<()> {
 
+    pyo3::prepare_freethreaded_python();
     let my_algo: PyObject= {
         let gil = Python::acquire_gil();
         let py = gil.python();
