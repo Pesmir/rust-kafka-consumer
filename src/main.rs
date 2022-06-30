@@ -1,4 +1,4 @@
-use pyo3::prelude::{Python, PyModule};
+use pyo3::prelude::{Python, PyModule, PyObject};
 use callysto::futures::StreamExt;
 use callysto::kafka::cconsumer::CStream;
 use callysto::kafka::enums::OffsetReset;
@@ -26,7 +26,14 @@ impl SharedState {
 
 async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Result<()> {
 
-    pyo3::prepare_freethreaded_python();
+    let my_algo: PyObject= {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        PyModule::import(py, "my_py_algos").unwrap()
+            .getattr("algo1_rust_version").unwrap()
+            .into()
+    };
+
     while let Some(msg) = stream.next().await {
         // This is used to measure the time the agent is active
         let now = Instant::now();
@@ -37,14 +44,13 @@ async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Resu
             .ok_or(CallystoError::GeneralError("Payload view failure".into()))??;
 
         // This block calls an "AI-Model" in python
+        let arg = (strm,);
         let gil = Python::acquire_gil();
         let py = gil.python();
-        let my_algo = PyModule::import(py, "my_py_algos").unwrap()
-            .getattr("algo1_rust_version").unwrap()
-            .getattr("rust_wrapper").unwrap();
-        let arg = (strm,);
-        let algo_res = my_algo.call1(arg).unwrap();
-        
+        let algo_res = my_algo
+            .clone_ref(py)
+            .getattr(py, "rust_wrapper").unwrap()
+            .call1(py, arg).unwrap();
 
         let elapsed_ms: u32 = now.elapsed().as_millis() as u32;
         let state = ctx.state();
