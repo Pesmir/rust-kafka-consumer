@@ -32,6 +32,7 @@ async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Resu
         let py = gil.python();
         PyModule::import(py, "my_py_algos").unwrap()
             .getattr("algo1_rust_version").unwrap()
+            .getattr("rust_wrapper").unwrap()
             .into()
     };
 
@@ -49,8 +50,6 @@ async fn counter_agent_1(mut stream: CStream, ctx: Context<SharedState>) -> Resu
         let gil = Python::acquire_gil();
         let py = gil.python();
         let algo_res = my_algo
-            .clone_ref(py)
-            .getattr(py, "rust_wrapper").unwrap()
             .call1(py, arg).unwrap();
 
         let elapsed_ms: u32 = now.elapsed().as_millis() as u32;
