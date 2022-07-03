@@ -1,5 +1,6 @@
 import pandas as pd
 import timeit
+import time
 import json
 from producer import GenericObject
 class Algo1(object):
@@ -46,9 +47,12 @@ if __name__ == "__main__":
             ', {"ts": 1, "val": 48}, {"ts": 2, "val": 74}, {"ts": 3, "val": 57}, {"ts":'
             '4, "val": 59}, {"ts": 5, "val": 12}]}}'
     )
-    def test_me():
-        algo = Algo1()
-        return algo.rust_wrapper(demo_go)
-
-    print(timeit.timeit(test_me, number=2000))
+    algo = Algo1()
+    raw_data: dict = json.loads(demo_go)
+    go = GenericObject.from_data(raw_data)
+    now = time.time()
+    for i in range(8076):
+        algo.calcuation(go)
+    end = time.time()
+    print(f"Took {end-now} seconds")
 
